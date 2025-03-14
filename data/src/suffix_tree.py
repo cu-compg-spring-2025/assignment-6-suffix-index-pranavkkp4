@@ -22,7 +22,6 @@ def get_args():
 
     return parser.parse_args()
 
-
 def add_suffix(nodes, suf):
     n = 0
     i = 0
@@ -55,7 +54,7 @@ def add_suffix(nodes, suf):
 def build_suffix_tree(text):
     text += "$"
 
-    nodes = [ ['', {}] ]
+    nodes = [['', {}]]
 
     for i in range(len(text)):
         add_suffix(nodes, text[i:])
@@ -63,8 +62,27 @@ def build_suffix_tree(text):
     return nodes
 
 def search_tree(suffix_tree, P):
-    # Your code here
-    return None
+    n = 0
+    i = 0
+    while i < len(P):
+        b = P[i]
+        children = suffix_tree[n][CHILDREN]
+        if b not in children:
+            return False  # Pattern not found
+        
+        n2 = children[b]
+        sub2 = suffix_tree[n2][SUB]
+        j = 0
+        while j < len(sub2) and i + j < len(P) and P[i + j] == sub2[j]:
+            j += 1
+        
+        if j < len(sub2):
+            return False  # Mismatch occurred
+        
+        i += j
+        n = n2
+    
+    return True  # Pattern found
 
 def main():
     args = get_args()
@@ -81,8 +99,8 @@ def main():
         
     if args.query:
         for query in args.query:
-            match_len = search_tree(tree, query)
-            print(f'{query} : {match_len}')
+            match_found = search_tree(tree, query)
+            print(f'{query} : {match_found}')
 
 if __name__ == '__main__':
     main()

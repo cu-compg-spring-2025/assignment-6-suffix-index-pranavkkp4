@@ -1,12 +1,8 @@
 import argparse
 import utils
-import suffix_tree
-
-SUB = 0
-CHILDREN = 1
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Suffix Tree')
+    parser = argparse.ArgumentParser(description='Suffix Trie')
 
     parser.add_argument('--reference',
                         help='Reference sequence file',
@@ -23,36 +19,28 @@ def get_args():
 
     return parser.parse_args()
 
-def build_suffix_array(T):
-    tree = suffix_tree.build_suffix_tree(T)
-    # Your code here
+def build_suffix_trie(s):
+    trie = {}
+    for i in range(len(s)):
+        current = trie
+        for char in s[i:]:
+            if char not in current:
+                current[char] = {}
+            current = current[char]
+        # Optionally, you can mark the end of a suffix with a terminal marker
+        current['#'] = True
+    return trie
 
-    #defs
-    stack = [0]
-    while stack:
-        node_idx = stack.pop()
-        for child in tree[node_idx][CHILDREN]:
-            stack.append(child)
-
-
-
-    return None
-
-
-def search_array(T, suffix_array, q):
-
-    # Your code here
-
-    # binary search
-    lo= -1
-    hi = len(suffix_array)
-    while (hi - lo > 1):
-        mid = int((lo + hi) / 2)
-        if suffix_array[mid] < q:
-            lo = mid
+def search_trie(trie, pattern):
+    current = trie
+    match_length = 0
+    for char in pattern:
+        if char in current:
+            match_length += 1
+            current = current[char]
         else:
-            hi = mid
-    return hi
+            break
+    return match_length
 
 def main():
     args = get_args()
@@ -65,11 +53,11 @@ def main():
         reference = utils.read_fasta(args.reference)
         T = reference[0][1]
 
-    array = build_suffix_array(T)
+    trie = build_suffix_trie(T)
 
     if args.query:
         for query in args.query:
-            match_len = search_array(array, query)
+            match_len = search_trie(trie, query)
             print(f'{query} : {match_len}')
 
 if __name__ == '__main__':
